@@ -78,6 +78,7 @@
 
 -(BOOL) CreateZipFile2:(NSString*) zipFile;
 -(BOOL) CreateZipFile2:(NSString*) zipFile Password:(NSString*) password;
+-(NSInteger) addFolderToZip:(NSString*)path pathPrefix:(NSString*)prefix;
 -(BOOL) addFileToZip:(NSString*) file newname:(NSString*) newname;
 -(BOOL) CloseZipFile2;
 

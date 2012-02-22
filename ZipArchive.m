@@ -85,6 +85,28 @@
 	return [self CreateZipFile2:zipFile];
 }
 
+
+-(NSInteger) addFolderToZip:(NSString*)path pathPrefix:(NSString*)prefix {
+	NSInteger	fileCount = 0;
+	NSArray		*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
+	
+	for (int i=0; i<[dirArray count]; i++) {
+		NSString		*dirItem = [dirArray objectAtIndex:i];
+		NSDictionary	*dict = [[NSFileManager defaultManager] attributesOfItemAtPath:[path stringByAppendingPathComponent:dirItem] error:nil];
+		
+		if ([[dict fileType] isEqualToString:NSFileTypeDirectory] || [[dict fileType] isEqualToString:NSFileTypeSymbolicLink]) { 
+			//Recursively do subfolders.
+			fileCount += [self addFolderToZip:[path stringByAppendingPathComponent:dirItem] pathPrefix:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)];
+		} else {
+			//Count if added OK.
+			if ([self addFileToZip:[path stringByAppendingPathComponent:dirItem] newname:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)]) {
+				fileCount++;
+			}
+		}
+	}
+	return fileCount;
+}
+
 /**
  * add an existing file on disk to the zip archive, compressing it.
  *
@@ -92,7 +114,6 @@
  * @param newname the name of the file in the zip archive, ie: path relative to the zip archive root.
  * @returns BOOL YES on success
  */
-
 -(BOOL) addFileToZip:(NSString*) file newname:(NSString*) newname;
 {
 	if( !_zipFile )
