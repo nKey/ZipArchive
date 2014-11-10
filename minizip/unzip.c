@@ -1111,6 +1111,7 @@ extern int ZEXPORT unzOpenCurrentFile3 (file, method, level, raw, password)
 
     if ((s->cur_file_info.compression_method!=0) &&
         (s->cur_file_info.compression_method!=Z_DEFLATED)) {
+        TRYFREE(pfile_in_zip_read_info);
         err=UNZ_BADZIPFILE;
         return err;
     }
