@@ -90,20 +90,20 @@
 	NSInteger	fileCount = 0;
 	NSArray		*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
 	
-	for (int i=0; i<[dirArray count]; i++) {
-		NSString		*dirItem = [dirArray objectAtIndex:i];
-		NSDictionary	*dict = [[NSFileManager defaultManager] attributesOfItemAtPath:[path stringByAppendingPathComponent:dirItem] error:nil];
-		
-		if ([[dict fileType] isEqualToString:NSFileTypeDirectory] || [[dict fileType] isEqualToString:NSFileTypeSymbolicLink]) { 
-			//Recursively do subfolders.
-			fileCount += [self addFolderToZip:[path stringByAppendingPathComponent:dirItem] pathPrefix:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)];
-		} else {
-			//Count if added OK.
-			if ([self addFileToZip:[path stringByAppendingPathComponent:dirItem] newname:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)]) {
-				fileCount++;
-			}
-		}
-	}
+    for (int i=0; i<[dirArray count]; i++) {
+        NSString		*dirItem = [dirArray objectAtIndex:i];
+        NSDictionary	*dict = [[NSFileManager defaultManager] attributesOfItemAtPath:[path stringByAppendingPathComponent:dirItem] error:nil];
+        
+        if ([[dict fileType] isEqualToString:NSFileTypeDirectory] || [[dict fileType] isEqualToString:NSFileTypeSymbolicLink]) {
+            //Recursively do subfolders.
+            fileCount += [self addFolderToZip:[path stringByAppendingPathComponent:dirItem] pathPrefix:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)];
+        } else {
+            //Count if added OK.
+            if ([self addFileToZip:[path stringByAppendingPathComponent:dirItem] newname:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)]) {
+                fileCount++;
+            }
+        }
+    }
 	return fileCount;
 }
 
@@ -150,8 +150,8 @@
 								  Z_DEFAULT_COMPRESSION );
 	}
 	else
-	{
-		data = [ NSData dataWithContentsOfFile:file];
+    {
+        data = [[NSData alloc] initWithContentsOfFile:file];
 		uLong crcValue = crc32( 0L,NULL, 0L );
 		crcValue = crc32( crcValue, (const Bytef*)[data bytes], [data length] );
 		ret = zipOpenNewFileInZip3( _zipFile,
@@ -175,10 +175,11 @@
 	}
 	if( data==nil )
 	{
-		data = [ NSData dataWithContentsOfFile:file];
+        data = [[NSData alloc] initWithContentsOfFile:file];
 	}
 	unsigned int dataLen = [data length];
 	ret = zipWriteInFileInZip( _zipFile, (const void*)[data bytes], dataLen);
+    [data release];
 	if( ret!=Z_OK )
 	{
 		return NO;
