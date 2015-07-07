@@ -171,6 +171,9 @@
 	}
 	if( ret!=Z_OK )
 	{
+        if (data) {
+            [data release];
+        }
 		return NO;
 	}
 	if( data==nil )
