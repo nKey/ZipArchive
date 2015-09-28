@@ -24,6 +24,9 @@
 -(NSDate*) Date1980;
 
 @property (nonatomic,copy) NSString* password;
+@property (nonatomic) float percentage;
+@property (nonatomic) float numberOfFiles;
+
 @end
 
 
@@ -86,25 +89,66 @@
 }
 
 
--(NSInteger) addFolderToZip:(NSString*)path pathPrefix:(NSString*)prefix {
-	NSInteger	fileCount = 0;
-	NSArray		*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
-	
-    for (int i=0; i<[dirArray count]; i++) {
-        NSString		*dirItem = [dirArray objectAtIndex:i];
-        NSDictionary	*dict = [[NSFileManager defaultManager] attributesOfItemAtPath:[path stringByAppendingPathComponent:dirItem] error:nil];
+- (NSInteger)addFolderToZip:(NSString*)path pathPrefix:(NSString*)prefix {
+    NSInteger fileCount = 0;
+    NSArray	*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
+    
+    if (!self.percentage && dirArray) {
+        self.numberOfFiles = ((0.57f/(float)self.numberOfInspectionsToExport)/[self setCountOfDirItems:path] );
+        self.percentage = self.numberOfFiles;
         
+    } else if(self.percentage && [dirArray count] == 0) {
+        self.numberOfFiles = ((0.001f/(float)self.numberOfInspectionsToExport));
+        
+        if (self.numberOfFiles - (0.03/(float)self.numberOfInspectionsToExport) > 0) {
+            self.percentage = self.numberOfFiles - (0.03/(float)self.numberOfInspectionsToExport);
+        } else {
+            self.percentage = self.numberOfFiles;
+        }
+        
+    }
+    
+    for (int i=0; i<[dirArray count]; i++) {
+        NSString *dirItem = [dirArray objectAtIndex:i];
+        NSDictionary *dict = [[NSFileManager defaultManager] attributesOfItemAtPath:[path stringByAppendingPathComponent:dirItem] error:nil];
         if ([[dict fileType] isEqualToString:NSFileTypeDirectory] || [[dict fileType] isEqualToString:NSFileTypeSymbolicLink]) {
             //Recursively do subfolders.
             fileCount += [self addFolderToZip:[path stringByAppendingPathComponent:dirItem] pathPrefix:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)];
+            self.updateProgress(self.percentage);
         } else {
             //Count if added OK.
             if ([self addFileToZip:[path stringByAppendingPathComponent:dirItem] newname:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)]) {
                 fileCount++;
+                self.updateProgress(self.percentage);
             }
         }
+        
     }
-	return fileCount;
+    return fileCount;
+}
+
+
+- (float)setCountOfDirItems:(NSString *)path {
+    NSInteger	fileCount = 0;
+    NSArray	*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
+    
+    for (int i = 0; i<[dirArray count]; i++) {
+        
+        NSString *dirItem = [dirArray objectAtIndex:i];
+        NSDictionary *dict = [[NSFileManager defaultManager] attributesOfItemAtPath:[path stringByAppendingPathComponent:dirItem] error:nil];
+        
+        if ([[dict fileType] isEqualToString:NSFileTypeDirectory] || [[dict fileType] isEqualToString:NSFileTypeSymbolicLink]) {
+            //Recursively do subfolders.
+            fileCount += [self setCountOfDirItems:[path stringByAppendingPathComponent:dirItem]];
+        } else {
+            //Count if added OK.
+            fileCount++;
+        }
+        
+    }
+    
+    return (float)fileCount;
+    
 }
 
 /**

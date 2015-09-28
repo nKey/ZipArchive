@@ -87,5 +87,9 @@
 -(BOOL) UnzipFileTo:(NSString*) path overWrite:(BOOL) overwrite;
 -(BOOL) UnzipCloseFile;
 -(NSArray*) getZipFileContents;     // list the contents of the zip archive. must be called after UnzipOpenFile
+-(float)getPercentage;
+
+@property (nonatomic, copy) void (^updateProgress)(float percentage);
+@property (nonatomic) NSInteger numberOfInspectionsToExport;
 
 @end
