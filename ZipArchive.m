@@ -55,6 +55,7 @@
     [_password release];
     [_delegate release];
     [_unzippedFiles release];
+    self.updateProgress = nil;
     
 	[super dealloc];
 }
