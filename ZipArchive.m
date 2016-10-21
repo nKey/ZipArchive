@@ -197,8 +197,13 @@
 	else
     {
         data = [[NSData alloc] initWithContentsOfFile:file];
+        if ([data length] > UINT_MAX) {
+            [data release];
+            return NO;
+        }
+        uInt dataLen = (uInt)([data length]);
 		uLong crcValue = crc32( 0L,NULL, 0L );
-		crcValue = crc32( crcValue, (const Bytef*)[data bytes], [data length] );
+		crcValue = crc32( crcValue, (const Bytef*)[data bytes], dataLen );
 		ret = zipOpenNewFileInZip3( _zipFile,
 								  (const char*) [newname UTF8String],
 								  &zipInfo,
@@ -221,11 +226,15 @@
         }
 		return NO;
 	}
-	if( data==nil )
+	if( data == nil )
 	{
         data = [[NSData alloc] initWithContentsOfFile:file];
 	}
-	unsigned int dataLen = [data length];
+    if ([data length] > UINT_MAX) {
+        [data release];
+        return NO;
+    }
+    uInt dataLen = (uInt)([data length]);
 	ret = zipWriteInFileInZip( _zipFile, (const void*)[data bytes], dataLen);
     [data release];
 	if( ret!=Z_OK )
@@ -233,8 +242,10 @@
 		return NO;
 	}
 	ret = zipCloseFileInZip( _zipFile );
-	if( ret!=Z_OK )
+    if( ret!=Z_OK )
+    {
 		return NO;
+    }
 	return YES;
 }
 
