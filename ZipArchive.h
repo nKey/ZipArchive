@@ -89,6 +89,5 @@
 -(NSArray*) getZipFileContents;     // list the contents of the zip archive. must be called after UnzipOpenFile
 
 @property (nonatomic, copy) void (^updateProgress)(float percentage);
-@property (nonatomic) NSInteger numberOfInspectionsToExport;
 
 @end

@@ -95,18 +95,17 @@
     NSArray	*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
     
     if (!self.percentage && dirArray) {
-        self.numberOfFiles = ((0.57f/(float)self.numberOfInspectionsToExport)/[self setCountOfDirItems:path] );
+        self.numberOfFiles = (0.57f/1.f/[self setCountOfDirItems:path]);
         self.percentage = self.numberOfFiles;
         
     } else if(self.percentage && [dirArray count] == 0) {
-        self.numberOfFiles = ((0.001f/(float)self.numberOfInspectionsToExport));
+        self.numberOfFiles = ((0.001f/(float)1));
         
-        if (self.numberOfFiles - (0.03/(float)self.numberOfInspectionsToExport) > 0) {
-            self.percentage = self.numberOfFiles - (0.03/(float)self.numberOfInspectionsToExport);
+        if (self.numberOfFiles - (0.03/(float)1) > 0) {
+            self.percentage = self.numberOfFiles - (0.03/(float)1);
         } else {
             self.percentage = self.numberOfFiles;
         }
-        
     }
     
     for (int i=0; i<[dirArray count]; i++) {
