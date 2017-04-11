@@ -24,6 +24,7 @@
 -(NSDate*) Date1980;
 
 @property (nonatomic,copy) NSString* password;
+    
 @property (nonatomic) float percentage;
 @property (nonatomic) float numberOfFiles;
 
@@ -95,9 +96,8 @@
     NSArray	*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
     
     if (!self.percentage && dirArray) {
-        self.numberOfFiles = (0.57f/1.f/[self setCountOfDirItems:path]);
-        self.percentage = self.numberOfFiles;
-        
+        self.numberOfFiles = [self setCountOfDirItems:path];
+        self.percentage = (100.0 / self.numberOfFiles) / 100.0;
     } else if(self.percentage && [dirArray count] == 0) {
         self.numberOfFiles = ((0.001f/(float)1));
         
