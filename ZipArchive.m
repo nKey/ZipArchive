@@ -24,9 +24,6 @@
 -(NSDate*) Date1980;
 
 @property (nonatomic,copy) NSString* password;
-    
-@property (nonatomic) float percentage;
-@property (nonatomic) float numberOfFiles;
 
 @end
 
@@ -56,7 +53,6 @@
     [_password release];
     [_delegate release];
     [_unzippedFiles release];
-    self.updateProgress = nil;
     
 	[super dealloc];
 }
@@ -91,65 +87,25 @@
 }
 
 
-- (NSInteger)addFolderToZip:(NSString*)path pathPrefix:(NSString*)prefix {
-    NSInteger fileCount = 0;
-    NSArray	*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
-    
-    if (!self.percentage && dirArray) {
-        self.numberOfFiles = [self setCountOfDirItems:path];
-        self.percentage = (100.0 / self.numberOfFiles) / 100.0;
-    } else if(self.percentage && [dirArray count] == 0) {
-        self.numberOfFiles = ((0.001f/(float)1));
-        
-        if (self.numberOfFiles - (0.03/(float)1) > 0) {
-            self.percentage = self.numberOfFiles - (0.03/(float)1);
-        } else {
-            self.percentage = self.numberOfFiles;
+- (BOOL)addDirectoryToZip:(NSString*)path withProgressBlock:(void(^)(unsigned long long fileSize))progressBlock {
+    NSString *basePath = [path stringByResolvingSymlinksInPath];
+    NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtPath:basePath];
+    for (NSString *contentItem in enumerator) {
+        BOOL isSymbolicLink = [[[enumerator fileAttributes] fileType] isEqualToString:NSFileTypeSymbolicLink];
+        BOOL isRegularFile = [[[enumerator fileAttributes] fileType] isEqualToString:NSFileTypeRegular];
+        if (!(isRegularFile || isSymbolicLink)) {
+            continue;
+        }
+        if (![self addFileToZip:[basePath stringByAppendingPathComponent:contentItem] newname:contentItem]) {
+            return NO;
+        }
+        if (progressBlock) {
+            progressBlock([[enumerator fileAttributes] fileSize]);
         }
     }
-    
-    for (int i=0; i<[dirArray count]; i++) {
-        NSString *dirItem = [dirArray objectAtIndex:i];
-        NSDictionary *dict = [[NSFileManager defaultManager] attributesOfItemAtPath:[path stringByAppendingPathComponent:dirItem] error:nil];
-        if ([[dict fileType] isEqualToString:NSFileTypeDirectory] || [[dict fileType] isEqualToString:NSFileTypeSymbolicLink]) {
-            //Recursively do subfolders.
-            fileCount += [self addFolderToZip:[path stringByAppendingPathComponent:dirItem] pathPrefix:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)];
-            self.updateProgress(self.percentage);
-        } else {
-            //Count if added OK.
-            if ([self addFileToZip:[path stringByAppendingPathComponent:dirItem] newname:([prefix length]>0 ? [prefix stringByAppendingPathComponent:dirItem] : dirItem)]) {
-                fileCount++;
-                self.updateProgress(self.percentage);
-            }
-        }
-        
-    }
-    return fileCount;
+    return YES;
 }
 
-
-- (float)setCountOfDirItems:(NSString *)path {
-    NSInteger	fileCount = 0;
-    NSArray	*dirArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil];
-    
-    for (int i = 0; i<[dirArray count]; i++) {
-        
-        NSString *dirItem = [dirArray objectAtIndex:i];
-        NSDictionary *dict = [[NSFileManager defaultManager] attributesOfItemAtPath:[path stringByAppendingPathComponent:dirItem] error:nil];
-        
-        if ([[dict fileType] isEqualToString:NSFileTypeDirectory] || [[dict fileType] isEqualToString:NSFileTypeSymbolicLink]) {
-            //Recursively do subfolders.
-            fileCount += [self setCountOfDirItems:[path stringByAppendingPathComponent:dirItem]];
-        } else {
-            //Count if added OK.
-            fileCount++;
-        }
-        
-    }
-    
-    return (float)fileCount;
-    
-}
 
 /**
  * add an existing file on disk to the zip archive, compressing it.
@@ -574,5 +530,5 @@
     return results;
 }
 
-@end
 
+@end

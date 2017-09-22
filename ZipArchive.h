@@ -78,7 +78,7 @@
 
 -(BOOL) CreateZipFile2:(NSString*) zipFile;
 -(BOOL) CreateZipFile2:(NSString*) zipFile Password:(NSString*) password;
--(NSInteger) addFolderToZip:(NSString*)path pathPrefix:(NSString*)prefix;
+-(BOOL) addDirectoryToZip:(NSString*)path withProgressBlock:(void(^)(unsigned long long fileSize))progressBlock;
 -(BOOL) addFileToZip:(NSString*) file newname:(NSString*) newname;
 -(BOOL) CloseZipFile2;
 
@@ -87,7 +87,5 @@
 -(BOOL) UnzipFileTo:(NSString*) path overWrite:(BOOL) overwrite;
 -(BOOL) UnzipCloseFile;
 -(NSArray*) getZipFileContents;     // list the contents of the zip archive. must be called after UnzipOpenFile
-
-@property (nonatomic, copy) void (^updateProgress)(float percentage);
 
 @end
