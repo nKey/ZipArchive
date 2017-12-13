@@ -79,6 +79,7 @@
 -(BOOL) CreateZipFile2:(NSString*) zipFile;
 -(BOOL) CreateZipFile2:(NSString*) zipFile Password:(NSString*) password;
 -(BOOL) addDirectoryToZip:(NSString*)path withProgressBlock:(void(^)(unsigned long long fileSize))progressBlock;
+-(BOOL) addFilesToZip:(NSArray<NSString *> *)files withProgressBlock:(void(^)(unsigned long long fileSize))progressBlock;
 -(BOOL) addFileToZip:(NSString*) file newname:(NSString*) newname;
 -(BOOL) CloseZipFile2;
 

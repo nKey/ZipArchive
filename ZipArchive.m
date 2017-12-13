@@ -106,6 +106,25 @@
     return YES;
 }
 
+- (BOOL)addFilesToZip:(NSArray<NSString *> *)files withProgressBlock:(void(^)(unsigned long long fileSize))progressBlock {
+    for (NSString *file in files) {
+        
+        NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:file error:nil];
+        BOOL isSymbolicLink = [[fileAttributes fileType] isEqualToString:NSFileTypeSymbolicLink];
+        BOOL isRegularFile = [[fileAttributes fileType] isEqualToString:NSFileTypeRegular];
+        if (!(isRegularFile || isSymbolicLink)) {
+            continue;
+        }
+        if (![self addFileToZip:file newname:file.lastPathComponent]) {
+            return NO;
+        }
+        if (progressBlock) {
+            progressBlock([fileAttributes fileSize]);
+        }
+    }
+    return YES;
+}
+
 
 /**
  * add an existing file on disk to the zip archive, compressing it.
